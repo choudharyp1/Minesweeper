@@ -21,11 +21,8 @@ enum cellState {
     FLAG
 }
 
+//Constructor method.
 public class BoardView extends JPanel implements IView {
-    final static boolean shouldFill = true;
-    final static boolean shouldWeightX = true;
-    final static boolean RIGHT_TO_LEFT = false;
-
     private Model model;
     int tiles_x;
     int tiles_y;
@@ -64,13 +61,13 @@ public class BoardView extends JPanel implements IView {
             String[] ss = s.split(",");
             int x = Integer.parseInt(ss[0]);
             int y = entry.getValue();
-            System.out.println(s);
             tileState[x][y] = cellState.MINE;
         }
 
         calculateAdjacentTiles();
     }
 
+    //Paint function. Paint tiles according to tile state.
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         for (int i = 0; i < tiles_x; i++) {
@@ -110,7 +107,7 @@ public class BoardView extends JPanel implements IView {
                         ImageIcon icon = new ImageIcon("Images/MINESWEEPER_8.png");
                         tiles[i][j].setIcon(icon);
                     } else if (tileState[i][j] == cellState.FLAG) {
-                        ImageIcon icon = new ImageIcon("Images/MINESWEEPER_M.png");
+                        ImageIcon icon = new ImageIcon("Images/MINESWEEPER_F.png");
                         tiles[i][j].setIcon(icon);
                     }
                 }
@@ -118,6 +115,7 @@ public class BoardView extends JPanel implements IView {
         }
     }
 
+    //Create a tile button
     private JButton createTileButton(int x, int y) {
         JButton button = new JButton();
         button.setName(x + "," + y);
@@ -125,6 +123,7 @@ public class BoardView extends JPanel implements IView {
         button.setFocusPainted(false);
         button.setOpaque(true);
 
+        //Add mouse listener to each tile.
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -133,13 +132,28 @@ public class BoardView extends JPanel implements IView {
                 String[] ss = s.split(",");
                 int x = Integer.parseInt(ss[0]);
                 int y = Integer.parseInt(ss[1]);
+
+                if (tileValue[x][y] == false){
+                    model.incrementNumOfClicks();
+                }
                 if (tileState[x][y] == cellState.MINE) {
                     tileValue[x][y] = true;
                     bombExploded();
                     int value = JOptionPane.showConfirmDialog(panel,
                             "You Lost! Do you want to play again?");
+                    if (value == 0){
+                        Main.createBoard(tiles_x, tiles_y, model.getNumberOfBombs());
+                    }
                 } else {
                     openTiles(x, y);
+                    if (isFinish()){
+                        finishGame();
+                        int value = JOptionPane.showConfirmDialog(panel,
+                                "You Won in " + model.getNumOfClicks() + " clicks! Do you want to play again?");
+                        if (value == 0){
+                            Main.createBoard(tiles_x, tiles_y, model.getNumberOfBombs());
+                        }
+                    }
                 }
                 model.notifyObservers();
             }
@@ -147,6 +161,40 @@ public class BoardView extends JPanel implements IView {
         return button;
     }
 
+    //Check if user won the game.
+    private boolean isFinish(){
+        for (int i = 0; i < tiles_y; i++){
+            for (int j = 0; j < tiles_x; j++){
+                if (tileState[i][j] != cellState.MINE && tileValue[i][j] == false){
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /*
+        Envoked when last non-mine tile is opened.
+        Replace all mines to flags.
+     */
+    private void finishGame(){
+        for (int i = 0; i < tiles_y; i++){
+            for (int j = 0; j < tiles_x; j++){
+                if (tileState[i][j] == cellState.MINE){
+                    tileState[i][j] = cellState.FLAG;
+                    tileValue[i][j] = true;
+                }
+            }
+        }
+        model.notifyObservers();
+    }
+
+    /*
+        Envoked when Mine has been clicked by the user
+        Explode all other mine
+        Disable user input from all tiles.
+     */
     private void bombExploded() {
         for (int i = 0; i < tileValue.length; i++) {
             for (int j = 0; j < tileValue[i].length; j++) {
@@ -160,6 +208,7 @@ public class BoardView extends JPanel implements IView {
         model.notifyObservers();
     }
 
+    //Opening all adjacent tiles. If adjacent tile is a MINE, this tile does not open its adjacent tiles anymore.
     private void openTiles(int i, int j) {
         if (i < 0 || i >= tiles_x || j < 0 || j >= tiles_y){
             return;
@@ -207,6 +256,7 @@ public class BoardView extends JPanel implements IView {
         }
     }
 
+    //Generate bomb coordinates.
     private HashMap<String, Integer> generateRandomPairs(int numberOfPairsNeeded) {
         Random random = new Random();
         HashMap<String, Integer> generated = new HashMap<String, Integer>();
@@ -227,6 +277,7 @@ public class BoardView extends JPanel implements IView {
         return generated;
     }
 
+    //Calculate the number of adjacent bombs for each tile and set it on tileState[][] array.
     private void calculateAdjacentTiles() {
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[0].length; j++) {
@@ -298,6 +349,7 @@ public class BoardView extends JPanel implements IView {
             }
         }
     }
+
 
     public void updateView() {
         repaint();

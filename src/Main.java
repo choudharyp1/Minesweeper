@@ -3,13 +3,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-//TODO: need to add bombs to model and the board.
-//TODO: Fix the image displays.
-
 public class Main {
+    static JFrame frame = new JFrame("Minesweeper");
+    static Container contentPane = frame.getContentPane();
+
     public static void main(String [] args){
         //Main Frame of the application.
-        JFrame frame = new JFrame("Minesweeper");
 
         int xCells = 20;
         int yCells = 20;
@@ -21,40 +20,83 @@ public class Main {
         BoardView boardView = new BoardView(model);
         model.addView(boardView);
 
-        /*
-        -----------------------------------MENU BAR--------------------------------------------------
-         */
-        JMenuBar menuBar = new JMenuBar();
-        JMenu newGameMenu = new JMenu("New Game");
-        JMenu loadGameMenu = new JMenu("Load Game");
-        menuBar.add(newGameMenu);
-        menuBar.add(loadGameMenu);
-        JMenuItem easyItem = new JMenuItem("Easy (5 x 5 tiles, 4 bombs)");
-        JMenuItem mediumItem = new JMenuItem("Medium (10 x 10 tiles, 20 bombs)");
-        JMenuItem hardItem = new JMenuItem("Hard (13 x 13 tiles, 60 bombs)");
-        JMenuItem expertItem = new JMenuItem("Hard (16 x 30 tiles, 120 bombs)");
-        newGameMenu.add(easyItem);
-        newGameMenu.add(mediumItem);
-        newGameMenu.add(hardItem);
-        newGameMenu.add(expertItem);
-        frame.setJMenuBar(menuBar);
 
-        /*
-        // TODO: ACTION LISTENERS NEEDED TO BE CONFIGURED
-        ----------------------------------END OF MENU BAR----------------------------------------------
-         */
-
-        Container contentPane = frame.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
         contentPane.add(boardView);
 
         frame.setMinimumSize(new Dimension(model.CELL_SIZE * xCells, model.CELL_SIZE * yCells));
         frame.setPreferredSize(new Dimension(model.CELL_SIZE * xCells, model.CELL_SIZE * yCells));
+
+        /*
+        -----------------------------------MENU BAR--------------------------------------------------
+         */
+        JMenuBar menuBar = new JMenuBar();
+        JMenu newGameMenu = new JMenu("New Game");
+        menuBar.add(newGameMenu);
+        JMenuItem easyItem = new JMenuItem("Easy (5 x 5 tiles, 5 bombs)");
+        easyItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.createBoard(5 , 5, 5);
+            }
+        });
+
+        JMenuItem mediumItem = new JMenuItem("Medium (10 x 10 tiles, 20 bombs)");
+        mediumItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.createBoard(10,10, 20);
+            }
+        });
+
+
+        JMenuItem hardItem = new JMenuItem("Hard (20 x 20 tiles, 40 bombs)");
+        hardItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.createBoard(20, 20, 40);
+            }
+        });
+
+        newGameMenu.add(easyItem);
+        newGameMenu.add(mediumItem);
+        newGameMenu.add(hardItem);
+
+
+        frame.setJMenuBar(menuBar);
+
+        /*
+        ----------------------------------END OF MENU BAR----------------------------------------------
+         */
+
+
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setFocusable(true);
         frame.setVisible(true);
 
+    }
+
+
+    /*
+    Destroy board
+    Create new Model
+    Create new BoardView
+    Recreate board.
+     */
+    public static void createBoard(int x, int y, int numOfBombs){
+        frame.setVisible(false);
+        Model newModel = new Model(x, y, numOfBombs);
+        BoardView newBoardView = new BoardView(newModel);
+        newModel.addView(newBoardView);
+        contentPane.remove(0);
+        contentPane.add(newBoardView);
+        frame.setMinimumSize(new Dimension(newModel.CELL_SIZE * x, newModel.CELL_SIZE * y));
+        frame.setPreferredSize(new Dimension(newModel.CELL_SIZE * x, newModel.CELL_SIZE * y));
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setFocusable(true);
+        frame.setVisible(true);
     }
 
 }

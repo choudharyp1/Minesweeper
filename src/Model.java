@@ -8,6 +8,8 @@ public class Model {
     private int tiles_y;
     private int numberOfBombs;
 
+    private int numOfClicks;
+
     private ArrayList<IView> views = new ArrayList<IView>();
 
 
@@ -15,6 +17,7 @@ public class Model {
         tiles_x = x;
         tiles_y = y;
         this.numberOfBombs = numberOfBombs;
+        numOfClicks = 0;
     }
 
     void notifyObservers(){
@@ -28,6 +31,13 @@ public class Model {
         view.updateView();
     }
 
+    int getNumOfClicks(){
+        return numOfClicks;
+    }
+
+    void incrementNumOfClicks(){
+        numOfClicks++;
+    }
 
     int getTiles_x(){
         return tiles_x;
@@ -41,5 +51,4 @@ public class Model {
         return numberOfBombs;
     }
 
-    //TODO: MUTATORS
 }
